@@ -12,7 +12,8 @@
     "purescript-control": "^3.3.1",
     "purescript-lists": "^4.12.0",
     "purescript-unfoldable": "^3.1.0",
-    "purescript-tuples": "^4.1.0"
+    "purescript-tuples": "^4.1.0",
+    "purescript-arrays": "^4.2.2"
   },
   "devDependencies": {
     "purescript-psci-support": "^3.0.0"
