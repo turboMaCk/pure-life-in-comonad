@@ -17,10 +17,5 @@
   },
   "devDependencies": {
     "purescript-psci-support": "^3.0.0"
-  },
-  "resolutions": {
-    "purescript-prelude": "^3.0.0",
-    "purescript-eff": "^3.0.0",
-    "purescript-control": "^3.3.1"
   }
 }

@@ -1,12 +1,15 @@
-module Data.Array.CircularZipper where
+module Data.Array.Zipper where
 
 import Prelude
 import Data.Array as Array
 import Data.Maybe (Maybe(..), maybe', maybe)
 import Data.Unfoldable (class Unfoldable, unfoldr)
 import Data.Tuple (Tuple(..))
+import Data.Foldable (class Foldable, foldl, foldMap, foldr)
+import Data.Monoid (class Monoid)
 import Control.Extend (class Extend)
 import Control.Comonad (class Comonad)
+import Data.Traversable (class Traversable, traverse)
 
 data Zipper a = Zipper (Array a) a (Array a)
 
@@ -59,10 +62,10 @@ prev (Zipper pre a after) =
     map (\ { init : init, last : last } -> Zipper init last $ Array.cons a after) $ Array.unsnoc pre
 
 left :: forall a. Zipper a -> Zipper a
-left zipper = maybe' (\_ -> start zipper) id $ next zipper
+left zipper = maybe' (const $ start zipper) id $ next zipper
 
 right :: forall a. Zipper a -> Zipper a
-right zipper = maybe' (\_ -> end zipper) id $ prev zipper
+right zipper = maybe' (const $ end zipper) id $ prev zipper
 
 instance showZipper :: (Show a) => Show (Zipper a) where
     show :: forall a. Show a => Zipper a -> String
@@ -77,12 +80,34 @@ instance functorZipper :: Functor Zipper where
     map f (Zipper ls c rs) = Zipper (f <$> ls) (f c) (f <$> rs)
 
 instance extendZipper :: Extend Zipper where
-    extend :: forall b a. (Zipper a -> b) -> Zipper a -> Zipper b
+    extend :: forall a b. (Zipper a -> b) -> Zipper a -> Zipper b
     extend f = Zipper <$> go f prev <*> f <*> go f next
         where go f d = map f <<< maybeIterate d
 
 instance comonadZipper :: Comonad Zipper where
     extract = read
+
+instance foldableZipper :: Foldable Zipper where
+    foldr :: forall a b. (a -> b -> b) -> b -> (Zipper a) -> b
+    foldr f acc (Zipper pre a after) = flip (foldr f) pre
+                                       $ f a
+                                       $ foldr f acc after
+
+    foldl :: forall a b. (b -> a -> b) -> b -> Zipper a -> b
+    foldl f acc (Zipper pre a after) = flip (foldl f) after
+                                       $ flip f a
+                                       $ foldl f acc pre
+    foldMap :: forall a m. (Monoid m) => (a -> m) -> (Zipper a) -> m
+    foldMap f (Zipper ls c rs) = foldMap f ls <> f c <> foldMap f rs
+
+instance traversableZipper :: Traversable Zipper where
+    traverse :: forall a b m. (Applicative m) => (a -> m b) -> (Zipper a) -> m (Zipper b)
+    traverse f (Zipper pre a after) = Zipper
+                                      <$> traverse f pre
+                                      <*> f a
+                                      <*> traverse f after
+    sequence = traverse id
+
 
 maybeIterate :: forall a f. (Unfoldable f) => (a -> Maybe a) -> a -> f a
 maybeIterate f = unfoldr (map dup <<< f)
