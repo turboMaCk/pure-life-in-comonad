@@ -6,9 +6,23 @@ import Data.Maybe
 
 data Zipper a = Zipper (Array a) a (Array a)
 
+singleton :: forall a. a -> Zipper a
+singleton a = Zipper [] a []
+
+cons :: forall a. a -> Zipper a -> Zipper a
+cons n (Zipper pre a after) = Zipper (Array.cons n pre) a after
+
+snoc :: forall a. Zipper a -> a -> Zipper a
+snoc (Zipper pre a after) n = Zipper pre a $ Array.snoc after n
+
 toArray :: forall a. Zipper a -> Array a
 toArray (Zipper pre a after) =
     (Array.snoc pre a) <> after
+
+fromArray :: forall a. Array a -> Maybe (Zipper a)
+fromArray =
+    map (\ { head : head, tail : tail } -> Zipper [] head tail )
+       <<< Array.uncons
 
 start :: forall a. Zipper a -> Zipper a
 start (Zipper pre a after) =
