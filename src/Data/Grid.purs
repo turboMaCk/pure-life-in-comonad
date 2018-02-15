@@ -8,8 +8,12 @@ import Data.Maybe (Maybe(..))
 import Control.Extend (class Extend)
 import Control.Comonad (class Comonad, extend)
 import Data.Traversable (sequence)
+import Data.Array as Array
 
 newtype Grid a = Grid (Zipper (Zipper a))
+
+init :: forall a. a -> Int -> Int -> Grid a
+init x w h = Grid $ Zipper.repeat (Zipper.repeat x w) h
 
 getZipper :: forall a. Grid a -> Zipper (Zipper a)
 getZipper (Grid zipper) = zipper
@@ -25,6 +29,12 @@ prev grid = Grid <$> (sequence $ Zipper.next <$> getZipper grid)
 
 next :: forall a. Grid a -> Maybe (Grid a)
 next grid = Grid <$> (sequence $ Zipper.prev <$> getZipper grid)
+
+-- vertical :: forall a. Grid a -> Zipper (Grid a)
+-- vertical (Grid zipper) = extend Grid zipper
+
+-- horizontal :: forall a. Grid a -> Zipper (Grid a)
+-- horizontal (Grid zipper) = extend
 
 up :: forall a. Grid a -> Grid a
 up = Grid <<< Zipper.left <<< getZipper
@@ -52,7 +62,7 @@ instance showGrid :: (Show a) => Show (Grid a) where
     show (Grid zipper) = show $ Zipper.toArray $ map showLine zipper
         where
           showLine z =
-              show (Zipper.toArray z) <> "\n"
+              Zipper.toArray z
 
 instance eqGrid :: (Eq a) => Eq (Grid a) where
     eq :: forall a. (Eq a) => Grid a -> Grid a -> Boolean
@@ -61,3 +71,12 @@ instance eqGrid :: (Eq a) => Eq (Grid a) where
 instance functorGrid :: Functor Grid where
     map :: forall a b. (a -> b) -> Grid a -> Grid b
     map fc = Grid <<< map (map fc) <<< getZipper
+
+-- instance extendGrid :: Extend Grid where
+--     extend :: forall a b. (Grid a -> b) -> Grid a -> Grid b
+--     extend f = Grid <$> go f prev
+--                     <*> go f next
+--                     <*> go f upwards
+--                     <*> go f downwards
+--         where
+--           go f d = map f <<< Zipper.maybeIterate d

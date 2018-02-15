@@ -31,6 +31,16 @@ fromArray =
     map (\ { head : head, tail : tail } -> Zipper [] head tail )
        <<< Array.uncons
 
+repeat :: forall a. a -> Int -> Zipper a
+repeat a n = repeat' a (singleton a) (n - 1)
+
+repeat' :: forall a. a -> Zipper a -> Int -> Zipper a
+repeat' x acc n =
+    if n < 1 then
+        acc
+    else
+        repeat' x (snoc acc x) (n - 1)
+
 read :: forall a. Zipper a -> a
 read (Zipper _ a _) = a
 
@@ -62,10 +72,10 @@ prev (Zipper pre a after) =
     map (\ { init : init, last : last } -> Zipper init last $ Array.cons a after) $ Array.unsnoc pre
 
 left :: forall a. Zipper a -> Zipper a
-left zipper = maybe' (const $ start zipper) id $ next zipper
+left zipper = maybe' (const $ start zipper) id $ prev zipper
 
 right :: forall a. Zipper a -> Zipper a
-right zipper = maybe' (const $ end zipper) id $ prev zipper
+right zipper = maybe' (const $ end zipper) id $ next zipper
 
 instance showZipper :: (Show a) => Show (Zipper a) where
     show :: forall a. Show a => Zipper a -> String
@@ -82,7 +92,7 @@ instance functorZipper :: Functor Zipper where
 instance extendZipper :: Extend Zipper where
     extend :: forall a b. (Zipper a -> b) -> Zipper a -> Zipper b
     extend f = Zipper <$> go f prev <*> f <*> go f next
-        where go f d = map f <<< maybeIterate d
+        where go f d = map f <<< maybeiterate d
 
 instance comonadZipper :: Comonad Zipper where
     extract = read
