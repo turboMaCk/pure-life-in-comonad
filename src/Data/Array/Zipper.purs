@@ -91,8 +91,7 @@ instance functorZipper :: Functor Zipper where
 
 instance extendZipper :: Extend Zipper where
     extend :: forall a b. (Zipper a -> b) -> Zipper a -> Zipper b
-    extend f = Zipper <$> go f prev <*> f <*> go f next
-        where go f d = map f <<< maybeiterate d
+    extend f z = f <$> genericMove prev next z
 
 instance comonadZipper :: Comonad Zipper where
     extract = read
@@ -119,6 +118,10 @@ instance traversableZipper :: Traversable Zipper where
     sequence = traverse id
 
 
-maybeIterate :: forall a f. (Unfoldable f) => (a -> Maybe a) -> a -> f a
-maybeIterate f = unfoldr (map dup <<< f)
+maybeIterate' :: forall a f. (Unfoldable f) => (a -> Maybe a) -> a -> f a
+maybeIterate' f = unfoldr (map dup <<< f)
     where dup a = Tuple a a
+
+genericMove :: forall a. (a -> Maybe a) -> (a -> Maybe a) -> a -> Zipper a
+genericMove a b z =
+  Zipper (maybeIterate' a z) z (maybeIterate' b z)

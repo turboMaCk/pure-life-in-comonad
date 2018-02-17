@@ -30,11 +30,11 @@ prev grid = Grid <$> (sequence $ Zipper.next <$> getZipper grid)
 next :: forall a. Grid a -> Maybe (Grid a)
 next grid = Grid <$> (sequence $ Zipper.prev <$> getZipper grid)
 
--- vertical :: forall a. Grid a -> Zipper (Grid a)
--- vertical (Grid zipper) = extend Grid zipper
+vertical :: forall a. Grid a -> Zipper (Grid a)
+vertical = Zipper.genericMove upwards downwards
 
--- horizontal :: forall a. Grid a -> Zipper (Grid a)
--- horizontal (Grid zipper) = extend
+horizontal :: forall a. Grid a -> Zipper (Grid a)
+horizontal = Zipper.genericMove prev next
 
 up :: forall a. Grid a -> Grid a
 up = Grid <<< Zipper.left <<< getZipper
@@ -72,11 +72,9 @@ instance functorGrid :: Functor Grid where
     map :: forall a b. (a -> b) -> Grid a -> Grid b
     map fc = Grid <<< map (map fc) <<< getZipper
 
--- instance extendGrid :: Extend Grid where
---     extend :: forall a b. (Grid a -> b) -> Grid a -> Grid b
---     extend f = Grid <$> go f prev
---                     <*> go f next
---                     <*> go f upwards
---                     <*> go f downwards
---         where
---           go f d = map f <<< Zipper.maybeIterate d
+instance extendGrid :: Extend Grid where
+    extend :: forall a b. (Grid a -> b) -> Grid a -> Grid b
+    extend f z = f <$> Grid (horizontal <$> vertical z)
+
+instance comonadGrid :: Comonad Grid where
+    extract = read
