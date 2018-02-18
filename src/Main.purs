@@ -13,7 +13,7 @@ import Control.Monad.Eff (Eff)
 import Graphics.Canvas (getCanvasElementById, getContext2D, CANVAS, Context2D)
 import Graphics.Canvas.Free (Graphics, beginPath, fill, rect, restore, runGraphics, save, setFillStyle, translate)
 
-import Signal.Time (millisecond, every)
+import Signal.Time (every)
 import Signal (Signal, foldp, runSignal, (<~))
 
 import Life (Life, glider, evolve)
@@ -69,7 +69,7 @@ update =
     foldp (const evolve)
 
 lifeEff :: forall eff. Context2D -> Signal (Eff ( canvas :: CANVAS | eff) Unit)
-lifeEff cfx = life cfx <~ update glider (every millisecond)
+lifeEff cfx = life cfx <~ update glider (every 200.0)
 
 main :: forall eff. Eff ( canvas :: CANVAS | eff ) Unit
 main = void $ unsafePartial do
