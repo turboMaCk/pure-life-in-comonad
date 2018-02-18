@@ -45,6 +45,16 @@ $ pulp --watch browserify -O --to dist/Main.js
 
 Now you can open index.html in your browser.
 
+## Credits and Resources
+
+Many good resources published by good people were used as studying material for this project. To name at least few:
+
+- [E. Millon's blog post](http://blog.emillon.org/posts/2012-10-18-comonadic-life.html)
+- [S. Tay's blog post](https://samtay.github.io/posts/comonadic-game-of-life.html)
+- [G. Roodt's implementation](https://github.com/groodt/purescript-game-of-life)
+- [T. Petricek's talk](https://www.youtube.com/watch?v=mqCsfYERzzE)
+- good work done of purescript community
+
 ## License
 
 BSD 3 Clause
