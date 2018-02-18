@@ -1,21 +1,24 @@
 module Main where
 
 import Prelude
-import Control.Monad.Eff (Eff)
-import Control.Monad.Eff.Console (CONSOLE, log)
-import Graphics.Canvas (getCanvasElementById, getContext2D, CANVAS, Context2D)
-import Graphics.Canvas.Free
 import Partial.Unsafe (unsafePartial)
-import Data.Maybe
-import Data.Tuple
+
+import Data.Maybe (Maybe(..))
+import Data.Tuple (Tuple(..), fst)
 import Data.Array as Array
-import Data.Foldable
-import Data.Int
-import Data.Date
+import Data.Foldable (foldl)
+import Data.Int (toNumber)
+
+import Control.Monad.Eff (Eff)
+import Graphics.Canvas (getCanvasElementById, getContext2D, CANVAS, Context2D)
+import Graphics.Canvas.Free (Graphics, beginPath, fill, rect, restore, runGraphics, save, setFillStyle, translate)
+
+import Signal.Time (millisecond, every)
+import Signal (Signal, foldp, runSignal, (<~))
 
 import Life (Life, glider, evolve)
 import Data.Grid (Grid(..))
-import Data.Array.Zipper
+import Data.Array.Zipper as Zipper
 
 type Cell = { x :: Int, y :: Int, alive :: Boolean }
 
@@ -25,10 +28,10 @@ indexedMap f = fst <<< foldl addCell (Tuple [] 0)
       addCell (Tuple acc n) i = Tuple (Array.snoc acc $ f i n) (n + 1)
 
 getCells :: Life -> Array Cell
-getCells (Grid zipper) = Array.concat $ indexedMap mapRow $ toArray zipper
+getCells (Grid zipper) = Array.concat $ indexedMap mapRow $ Zipper.toArray zipper
     where
       mapRow row y =
-          indexedMap (\state x -> { x : x, y : y, alive : state }) $ toArray row
+          indexedMap (\state x -> { x : x, y : y, alive : state }) $ Zipper.toArray row
 
 at :: Int -> Int -> Graphics Unit -> Graphics Unit
 at x y gfx = do
@@ -61,9 +64,15 @@ seqn arr =
 life :: forall eff. Context2D -> Life -> Eff ( canvas :: CANVAS | eff ) Unit
 life context grid = runGraphics context >>= const $ seqn $ drawCalls $ getCells grid
 
-main :: Eff _ Unit
+update :: forall a. Life -> Signal a -> Signal Life
+update =
+    foldp (const evolve)
+
+lifeEff :: forall eff. Context2D -> Signal (Eff ( canvas :: CANVAS | eff) Unit)
+lifeEff cfx = life cfx <~ update glider (every millisecond)
+
+main :: forall eff. Eff ( canvas :: CANVAS | eff ) Unit
 main = void $ unsafePartial do
     Just canvas <- getCanvasElementById "canvas"
     context <- getContext2D canvas
-
-    life context $ evolve $ glider
+    runSignal $ lifeEff context

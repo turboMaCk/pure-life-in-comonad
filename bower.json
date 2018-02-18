@@ -16,7 +16,7 @@
     "purescript-arrays": "^4.2.2",
     "purescript-free-canvas": "^3.0.0",
     "purescript-integers": "^3.2.0",
-    "purescript-datetime": "^3.4.1"
+    "purescript-signal": "^9.0.0"
   },
   "devDependencies": {
     "purescript-psci-support": "^3.0.0"
