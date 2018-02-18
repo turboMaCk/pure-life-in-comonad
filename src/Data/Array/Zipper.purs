@@ -72,10 +72,10 @@ prev (Zipper pre a after) =
     map (\ { init : init, last : last } -> Zipper init last $ Array.cons a after) $ Array.unsnoc pre
 
 left :: forall a. Zipper a -> Zipper a
-left zipper = maybe' (const $ start zipper) id $ prev zipper
+left zipper = maybe' (const $ end zipper) id $ prev zipper
 
 right :: forall a. Zipper a -> Zipper a
-right zipper = maybe' (const $ end zipper) id $ next zipper
+right zipper = maybe' (const $ start zipper) id $ next zipper
 
 instance showZipper :: (Show a) => Show (Zipper a) where
     show :: forall a. Show a => Zipper a -> String

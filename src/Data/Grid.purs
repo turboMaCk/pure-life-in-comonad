@@ -34,7 +34,7 @@ vertical :: forall a. Grid a -> Zipper (Grid a)
 vertical = Zipper.genericMove upwards downwards
 
 horizontal :: forall a. Grid a -> Zipper (Grid a)
-horizontal = Zipper.genericMove prev next
+horizontal = Zipper.genericMove next prev
 
 up :: forall a. Grid a -> Grid a
 up = Grid <<< Zipper.left <<< getZipper
@@ -78,3 +78,9 @@ instance extendGrid :: Extend Grid where
 
 instance comonadGrid :: Comonad Grid where
     extract = read
+
+neighbours :: forall a b. Grid a -> Array (Grid a)
+neighbours g = ((#) g) <$>
+    [ up <<< left   , up   , up <<< right
+    , left          ,        right
+    , down <<< left , down , down <<< right ]
