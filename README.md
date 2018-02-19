@@ -9,9 +9,9 @@ with rendering to Canvas.
 
 Instead of infinite grid the `Grid` data-structure is "repeating" itself infinitely.
 Last and first cell in a zipper are acting as neighbors.
-You can visualize this as a Grid drawn on a surface of a sphere if you wish.
+You can visualize this as a grid drawn on a surface of a sphere if you wish.
 The lowest level implementation is done in [`Data.Array.Zipper`](https://github.com/turboMaCk/pure-life-in-comonad/blob/master/src/Data/Array/Zipper.purs)
-which implements basic zipper using native `Array`. This type implements `Show`, `Eq`, `Functor`, `Extend`, `Comonad`, `Foldable` and `Traversable` type classes.
+module which defines basic zipper using native `Array`. This type implements `Show`, `Eq`, `Functor`, `Extend`, `Comonad`, `Foldable` and `Traversable` type classes.
 [`Data.Grid`](https://github.com/turboMaCk/pure-life-in-comonad/blob/master/src/Data/Grid.purs) is build as `Zipper (Zipper a)`
 and implements `Show`, `Eq`, `Functor`, `Extend` and `Comonad`. Life itself is then defined with [`Life`](https://github.com/turboMaCk/pure-life-in-comonad/blob/master/src/Life.purs)
 module using `Grid Boolean` in straight forward way.
@@ -53,7 +53,7 @@ Many good resources published by good people were used as studying material for 
 - [S. Tay's blog post](https://samtay.github.io/posts/comonadic-game-of-life.html)
 - [G. Roodt's (non comonadic) implementation](https://github.com/groodt/purescript-game-of-life)
 - [T. Petricek's talk](https://www.youtube.com/watch?v=mqCsfYERzzE)
-- good work done of purescript community
+- good work done by purescript community
 
 ## License
 
